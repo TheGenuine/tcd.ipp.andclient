@@ -41,9 +41,8 @@ public class SendData implements Action, Callback {
 			this.out = this.bean.getOut();
 		}
 		
-		send(Statics.RX_HELI_ACK);
-		
 		if(this.sender == null) {
+			send(Statics.RX_HELI_ACK);
 			initializeDataSender();
 		}
 		
@@ -51,6 +50,8 @@ public class SendData implements Action, Callback {
 			Object parameter = event.getParameter(Statics.TRAMSITION_ID);
 			if(parameter != null && parameter instanceof Long) {
 				this.dataset.remove(parameter);
+				System.out.println("Ack for " + parameter);
+				System.out.println(this.dataset.size() + " remaining");
 			}
 		}
 	}
