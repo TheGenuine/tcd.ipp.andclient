@@ -29,6 +29,7 @@ public class MainActivity extends FragmentActivity {
     ViewPager mViewPager;
 
 	private CommunicationServer comServer;
+	private DiscoveryService discoveryHandler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,10 @@ public class MainActivity extends FragmentActivity {
         this.comServer = new CommunicationServer(getApplicationContext());
         this.comServer.setRunning(true);
         this.comServer.start();
+        
+		this.discoveryHandler = new DiscoveryService();
+		this.discoveryHandler.setRunning(true);
+		this.discoveryHandler.start();
     }
 
     @Override
@@ -136,6 +141,9 @@ public class MainActivity extends FragmentActivity {
     	super.onStop();
     	if(this.comServer != null) {
     		this.comServer.shutdown();
+    	}
+    	if(this.discoveryHandler != null) {
+    		this.discoveryHandler.shutdown();
     	}
     }
 }
