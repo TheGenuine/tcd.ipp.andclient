@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="times">
+        <item>06:00h</item>
+        <item>09:00h</item>
+        <item>12:00h</item>
+        <item>15:00h</item>
+        <item>18:00h</item>
+        <item>21:00h</item>
+    </string-array>
+</resources>
