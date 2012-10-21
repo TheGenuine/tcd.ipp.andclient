@@ -5,8 +5,14 @@ import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import com.google.gson.Gson;
 
 import android.content.SharedPreferences;
+import android.widget.TableRow;
+import android.widget.TextView;
+import de.reneruck.tcd.ipp.andclient.R;
 import de.reneruck.tcd.ipp.datamodel.Callback;
 import de.reneruck.tcd.ipp.datamodel.Datagram;
 import de.reneruck.tcd.ipp.datamodel.Statics;
@@ -22,6 +28,7 @@ public class SendData implements Action, Callback {
 	private Map<Long, Transition> dataset = new HashMap<Long, Transition>();
 	private SharedPreferences transitionsStore;
 	private TransitionExchangeBean bean;
+	private Gson gson;
 
 	public SendData(TransitionExchangeBean transitionExchangeBean, SharedPreferences transitionsStore ) {
 		this.bean = transitionExchangeBean;
@@ -55,13 +62,38 @@ public class SendData implements Action, Callback {
 	}
 
 	private void createDataset() {
+		this.gson = new Gson();
 		Map<String, ?> all = this.transitionsStore.getAll();
-		Collection<Transition> allTransitions = (Collection<Transition>) all.values();
-		for (Transition transition : allTransitions) {
-			this.dataset.put(transition.getTransitionId(), transition);
+		Collection<String> allTransitions = (Collection<String>) all.values();
+		for (String transitionString : allTransitions) {
+			Object deserialized = deserialize(transitionString);
+			if(deserialized instanceof Transition) {
+				this.dataset.put(((Transition) deserialized).getTransitionId(), (Transition) deserialized);
+			}
 		}
 	}
-
+	
+	private Object deserialize(Object readObject) {
+		if (readObject instanceof String) {
+			String input = (String) readObject;
+			String[] split = input.split("=");
+			if (split.length > 1) {
+				try {
+					Class<?> transitionClass = Class.forName(split[0]);
+					Object fromJson = this.gson.fromJson(split[1].trim(), transitionClass);
+					System.out.println("Successfully deserialized ");
+					return fromJson;
+				} catch (ClassNotFoundException e) {
+					e.getMessage();
+					System.err.println("Cannot deserialize, discarding package");
+				}
+			} else {
+				System.err.println("No valid class identifier found, discarding package");
+			}
+		}
+		return readObject;
+	}
+	
 	@Override
 	public void handleCallback() {
 		this.sender = null;
