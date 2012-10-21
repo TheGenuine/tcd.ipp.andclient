@@ -113,6 +113,8 @@ public class CommunicationServer extends Thread {
 				this.out = new ObjectOutputStream(this.connection.getOutputStream());
 				this.out.flush();
 				this.in = new ObjectInputStream(inputStream);
+				this.transitionExchangeBean.setIn(in);
+				this.transitionExchangeBean.setOut(out);
 				
 				while(this.connection != null && this.connection.isConnected()) {
 					handleInput(this.in.readObject());
