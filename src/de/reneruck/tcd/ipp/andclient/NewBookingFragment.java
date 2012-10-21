@@ -34,6 +34,7 @@ public class NewBookingFragment extends Fragment {
 		@Override
 		public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
 			String date = "";
+			month++;
 			if((month /10) < 0.9) {
 				date = dayOfMonth + ".0" + month + "." + year;
 			} else {
