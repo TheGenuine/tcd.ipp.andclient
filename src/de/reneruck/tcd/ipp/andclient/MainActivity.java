@@ -43,9 +43,10 @@ public class MainActivity extends FragmentActivity {
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         
-//        this.comServer = new CommunicationServer(getApplicationContext());
-//        this.comServer.setRunning(true);
-//        this.comServer.start();
+        
+        this.comServer = new CommunicationServer(getApplicationContext());
+        this.comServer.setRunning(true);
+        this.comServer.start();
     }
 
     @Override
@@ -133,6 +134,8 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onStop() {
     	super.onStop();
-    	//this.comServer.setRunning(false);
+    	if(this.comServer != null) {
+    		this.comServer.shutdown();
+    	}
     }
 }

@@ -149,4 +149,18 @@ public class CommunicationServer extends Thread {
 		return event;
 	}
 	
+	public void shutdown() {
+		try {
+			this.running = false;
+			
+			if(this.socket != null) {
+				this.socket.close();
+			}
+			if(this.connection != null) {
+				this.connection.close();
+			}
+		} catch (IOException e) {
+			e.fillInStackTrace();
+		}
+	}
 }
