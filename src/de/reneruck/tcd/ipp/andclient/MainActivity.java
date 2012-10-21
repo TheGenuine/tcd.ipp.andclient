@@ -43,9 +43,9 @@ public class MainActivity extends FragmentActivity {
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         
-        this.comServer = new CommunicationServer(getApplicationContext());
-        this.comServer.setRunning(true);
-        this.comServer.start();
+//        this.comServer = new CommunicationServer(getApplicationContext());
+//        this.comServer.setRunning(true);
+//        this.comServer.start();
     }
 
     @Override
@@ -82,9 +82,7 @@ public class MainActivity extends FragmentActivity {
 					fragment = new NewBookingFragment();
 					break;
 				case 2: // Manage Bookings
-					fragment = new DummySectionFragment();
-					args.putInt(DummySectionFragment.ARG_SECTION_NUMBER, i + 1);
-					fragment.setArguments(args);
+					fragment = new ManageBookingsFragment();
 					break;
 
 			default:
@@ -135,6 +133,6 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onStop() {
     	super.onStop();
-    	this.comServer.setRunning(false);
+    	//this.comServer.setRunning(false);
     }
 }
