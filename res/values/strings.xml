@@ -1,10 +1,9 @@
 <resources>
 
-    <string name="app_name">de.reneruck.tcd.ipp.andClient</string>
+    <string name="app_name">TCD Booking Client</string>
     <string name="title_section3">Manage Bookings</string>
     <string name="title_section2">New Booking</string>
     <string name="title_section1">Overview</string>
     <string name="menu_settings">Settings</string>
-    <string name="title_activity_main">MainActivity</string>
 
 </resources>
