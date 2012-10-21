@@ -10,6 +10,7 @@ import java.net.Socket;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import de.reneruck.tcd.ipp.andclient.actions.FinackAndShutdown;
 import de.reneruck.tcd.ipp.andclient.actions.ReceiveData;
 import de.reneruck.tcd.ipp.andclient.actions.SendControlSignal;
 import de.reneruck.tcd.ipp.andclient.actions.SendData;
@@ -54,8 +55,8 @@ public class CommunicationServer extends Thread {
 		Action receiveData = new ReceiveData(this.transitionExchangeBean, this.transitionStore);
 		Action sendData = new SendData(this.transitionExchangeBean, this.transitionStore);
 		Action sendFIN = new SendControlSignal(this.transitionExchangeBean, Statics.FIN);
-		Action sendFIN_ACK = new SendControlSignal(this.transitionExchangeBean, Statics.FINACK);
 		Action shutdownConnection = new ShutdownConnection(this.transitionExchangeBean);
+		Action sendFinackAndShutdon = new FinackAndShutdown(this.transitionExchangeBean);
 
 		Transition rxSyn = new Transition(new TransitionEvent(Statics.SYN), state_syn, sendACK);
 		Transition rxSynAck = new Transition(new TransitionEvent(Statics.SYNACK), state_waitRxMode, null);
@@ -66,9 +67,8 @@ public class CommunicationServer extends Thread {
 		Transition rxData = new Transition(new TransitionEvent(Statics.DATA), state_ReceiveData, receiveData);
 
 		Transition finishedSending = new Transition(new TransitionEvent(Statics.FINISH_RX_HELI), state_fin, sendFIN);
-		Transition rxFin = new Transition(new TransitionEvent(Statics.FIN), state_fin, sendFIN_ACK);
+		Transition rxFin = new Transition(new TransitionEvent(Statics.FIN), null, sendFinackAndShutdon);
 		Transition rxFinACK = new Transition(new TransitionEvent(Statics.FINACK), null, shutdownConnection);
-		Transition shutdown = new Transition(new TransitionEvent(Statics.SHUTDOWN), null, shutdownConnection);
 
 		state_start.addTranstion(rxSyn);
 		state_syn.addTranstion(rxSyn);
@@ -80,7 +80,6 @@ public class CommunicationServer extends Thread {
 		state_ReceiveData.addTranstion(rxData);
 		state_ReceiveData.addTranstion(rxFin);
 		state_fin.addTranstion(rxFinACK);
-		state_fin.addTranstion(shutdown);
 
 		this.fsm.setStartState(state_start);
 		this.transitionExchangeBean.setFsm(this.fsm);
@@ -113,13 +112,17 @@ public class CommunicationServer extends Thread {
 				this.out = new ObjectOutputStream(this.connection.getOutputStream());
 				this.out.flush();
 				this.in = new ObjectInputStream(inputStream);
-				this.transitionExchangeBean.setIn(in);
-				this.transitionExchangeBean.setOut(out);
+				this.transitionExchangeBean.setIn(this.in);
+				this.transitionExchangeBean.setOut(this.out);
+				this.transitionExchangeBean.setConnection(this.connection);
 				
-				while(this.connection != null && this.connection.isConnected()) {
+				while(this.connection != null && !this.connection.isClosed()) {
 					handleInput(this.in.readObject());
 				}
 				
+				if(this.fsm == null ||this.fsm.getCurrentState() == null) {
+					setupFSM();
+				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (IOException e1) {
