@@ -7,7 +7,7 @@ import java.util.Date;
 
 import de.reneruck.tcd.ipp.datamodel.Airport;
 import de.reneruck.tcd.ipp.datamodel.Booking;
-import de.reneruck.tcd.ipp.datamodel.NewBookingTransition;
+import de.reneruck.tcd.ipp.datamodel.transition.NewBookingTransition;
 
 import android.content.Context;
 import android.content.SharedPreferences;

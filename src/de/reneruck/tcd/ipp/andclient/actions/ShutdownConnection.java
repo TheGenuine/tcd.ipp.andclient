@@ -2,7 +2,7 @@ package de.reneruck.tcd.ipp.andclient.actions;
 
 import java.net.Socket;
 
-import de.reneruck.tcd.ipp.datamodel.TransitionExchangeBean;
+import de.reneruck.tcd.ipp.datamodel.transition.TransitionExchangeBean;
 import de.reneruck.tcd.ipp.fsm.Action;
 import de.reneruck.tcd.ipp.fsm.TransitionEvent;
 

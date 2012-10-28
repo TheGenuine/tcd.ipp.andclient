@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.google.gson.Gson;
 
-import de.reneruck.tcd.ipp.datamodel.Transition;
+import de.reneruck.tcd.ipp.datamodel.transition.Transition;
 
 import android.content.Context;
 import android.content.SharedPreferences;
