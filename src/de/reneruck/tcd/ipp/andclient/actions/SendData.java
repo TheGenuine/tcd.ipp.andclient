@@ -5,24 +5,24 @@ import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+
+import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.gson.Gson;
 
-import android.content.SharedPreferences;
-import android.widget.TableRow;
-import android.widget.TextView;
-import de.reneruck.tcd.ipp.andclient.R;
 import de.reneruck.tcd.ipp.datamodel.Callback;
 import de.reneruck.tcd.ipp.datamodel.Datagram;
 import de.reneruck.tcd.ipp.datamodel.Statics;
 import de.reneruck.tcd.ipp.datamodel.transition.Transition;
 import de.reneruck.tcd.ipp.datamodel.transition.TransitionExchangeBean;
+import de.reneruck.tcd.ipp.datamodel.transition.TransitionState;
 import de.reneruck.tcd.ipp.fsm.Action;
 import de.reneruck.tcd.ipp.fsm.TransitionEvent;
 
 public class SendData implements Action, Callback {
 
+	private static final String TAG = "SendData";
 	private ObjectOutputStream out;
 	private DataSender sender;
 	private Map<Long, Transition> dataset = new HashMap<Long, Transition>();
@@ -67,13 +67,19 @@ public class SendData implements Action, Callback {
 		Map<String, ?> all = this.transitionsStore.getAll();
 		Collection<String> allTransitions = (Collection<String>) all.values();
 		for (String transitionString : allTransitions) {
-			Object deserialized = deserialize(transitionString);
-			if(deserialized instanceof Transition) {
-				this.dataset.put(((Transition) deserialized).getTransitionId(), (Transition) deserialized);
+			if(isPending(transitionString)){
+				Object deserialized = deserialize(transitionString);
+				if(deserialized instanceof Transition) {
+					this.dataset.put(((Transition) deserialized).getTransitionId(), (Transition) deserialized);
+				}
 			}
 		}
 	}
-	
+
+	private boolean isPending(String transitionString) {
+		return transitionString.contains("\"state\":\"PENDING\"");
+	}
+
 	private Object deserialize(Object readObject) {
 		if (readObject instanceof String) {
 			String input = (String) readObject;
@@ -82,14 +88,14 @@ public class SendData implements Action, Callback {
 				try {
 					Class<?> transitionClass = Class.forName(split[0]);
 					Object fromJson = this.gson.fromJson(split[1].trim(), transitionClass);
-					System.out.println("Successfully deserialized ");
+					Log.d(TAG, "Successfully deserialized ");
 					return fromJson;
 				} catch (ClassNotFoundException e) {
 					e.getMessage();
-					System.err.println("Cannot deserialize, discarding package");
+					Log.e(TAG, "Cannot deserialize, discarding package");
 				}
 			} else {
-				System.err.println("No valid class identifier found, discarding package");
+				Log.e(TAG, "No valid class identifier found, discarding package");
 			}
 		}
 		return readObject;
