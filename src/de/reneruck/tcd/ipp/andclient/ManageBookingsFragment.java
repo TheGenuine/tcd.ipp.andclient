@@ -43,6 +43,7 @@ public class ManageBookingsFragment extends Fragment {
 	private static final String TAG = null;
 	private Gson gson;
 	private Object selectedItemTag;
+	private View layout;
 
 	public ManageBookingsFragment() {
 		this.gson = new Gson();
@@ -50,8 +51,13 @@ public class ManageBookingsFragment extends Fragment {
 	
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    	TableLayout layout = (TableLayout) inflater.inflate(R.layout.fragment_manage_bookings, null);
-    	SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Bookings", Context.MODE_PRIVATE);
+    	this.layout = (TableLayout) inflater.inflate(R.layout.fragment_manage_bookings, null);
+    	generateTableContent(inflater);
+        return this.layout;
+    }
+
+	private void generateTableContent(LayoutInflater inflater) {
+		SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Bookings", Context.MODE_PRIVATE);
 
     	Map<String, ?> all = sharedPreferences.getAll();
     	Set<String> keySet = all.keySet();
@@ -80,12 +86,11 @@ public class ManageBookingsFragment extends Fragment {
 				id.setText(idString);
 				status.setText(transition.getTransitionState().toString());
 				row.setTag(idString);
-				layout.addView(row);
+				((TableLayout)this.layout).addView(row);
 				registerForContextMenu(row);
 			}
 		}
-        return layout;
-    }
+	}
 	
 	private void setType(Transition transition, TextView type) {
 		if(transition instanceof NewBookingTransition) {
@@ -121,7 +126,7 @@ public class ManageBookingsFragment extends Fragment {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		this.selectedItemTag = v.getTag();
-		MenuInflater inflater = getMenuInflater();
+		MenuInflater inflater = new MenuInflater(getActivity().getApplicationContext());
 		menu.setHeaderTitle("Booking Options");
 	    inflater.inflate(R.menu.manage_bookings_menu, menu);
 	}
@@ -166,6 +171,11 @@ public class ManageBookingsFragment extends Fragment {
 		return true;
 	}
 
+	private void updateTableContent() {
+		((TableLayout)this.layout).removeAllViews();
+		generateTableContent(getActivity().getLayoutInflater());
+	}
+
 	private String getBookingDetails(Transition transition) {
 		Booking booking = transition.getBooking();
 		SimpleDateFormat formater = new SimpleDateFormat("dd.MM.yyyy HH:mm");
@@ -173,9 +183,17 @@ public class ManageBookingsFragment extends Fragment {
 				"ID: " + booking.getId() + "\n" +
 				"Name: " + booking.getRequester() + "\n" +
 				"From: " + booking.getFrom() + "\n" +
-				"Date: " + formater.format(booking.getTravelDate());
+				"Date: " + formater.format(booking.getTravelDate()) + "\n" +
+				"Accepted: " + booking.isAccepted() + "\n" + booking.getReason();
 	}
 
+	/**
+	 * Determines if the chosen {@link Transition} is cancel able or not and if
+	 * yes it will create a new {@link CancelBookingTransition}
+	 * 
+	 * @param sharedPreferences
+	 * @param transition
+	 */
 	private void handleTransition(SharedPreferences sharedPreferences, Transition transition) {
 		if(TransitionState.PENDING.equals(transition.getTransitionState())){
 			if(transition.getBooking().getTravelDate().after(THREE_DAYS)) { // no booking cancelation if flight < three days 
@@ -183,7 +201,7 @@ public class ManageBookingsFragment extends Fragment {
 			} else {
 				FragmentManager fragmentManager = getFragmentManager();
 				FragmentTransaction ft = fragmentManager.beginTransaction();
-				ft.add(new InfoDialog("Cancelation not possible", "No cancelation of bookings nearer than 3 days possible"), "infoDialog");
+				ft.add(new InfoDialog("Cancelation not possible", "No cancelation of bookings nearer than 3 days"), "infoDialog");
 				ft.commit();
 			}
 		} else {
@@ -195,7 +213,8 @@ public class ManageBookingsFragment extends Fragment {
 		Editor edit = sharedPreferences.edit();
 		CancelBookingTransition cancelTransition = new CancelBookingTransition(booking);
 		edit.putString("T" + cancelTransition.getTransitionId(), cancelTransition.toString());
-		edit.apply();
+		edit.commit();
+		updateTableContent();
 	}
 	
 	private Transition getTransitionForId(String selectedItemTag, SharedPreferences sharedPreferences) {
@@ -207,10 +226,6 @@ public class ManageBookingsFragment extends Fragment {
 		return null;
 	}
 
-	private MenuInflater getMenuInflater() {
-		return new MenuInflater(getActivity());
-	}
-	
 	class InfoDialog extends DialogFragment {
 		
 		private String message;
