@@ -66,8 +66,10 @@ public class SendData implements Action, Callback {
 		this.gson = new Gson();
 		Map<String, ?> all = this.transitionsStore.getAll();
 		Collection<String> allTransitions = (Collection<String>) all.values();
+		
 		for (String transitionString : allTransitions) {
 			if(isPending(transitionString)){
+				
 				Object deserialized = deserialize(transitionString);
 				if(deserialized instanceof Transition) {
 					this.dataset.put(((Transition) deserialized).getTransitionId(), (Transition) deserialized);

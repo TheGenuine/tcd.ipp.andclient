@@ -19,7 +19,6 @@ import de.reneruck.tcd.ipp.fsm.TransitionEvent;
 public class ReceiveData implements Action {
 
 	private ObjectOutputStream out;
-	private Queue<Transition> queue = new LinkedBlockingQueue<Transition>();
 	private SharedPreferences transitionQueue;
 	private TransitionExchangeBean bean;
 	
@@ -40,11 +39,15 @@ public class ReceiveData implements Action {
 			boolean contains = this.transitionQueue.contains(transitonId);
 			
 			if(contains) {
-				String storedTranisiton = this.transitionQueue.getString(transitonId, "");
 				Editor edit = this.transitionQueue.edit();
 				edit.remove(transitonId);
 				edit.putString(transitonId, transition.toString());
 				edit.apply();
+			} else {
+				/*
+				 * Store all Transitions that does not belong to this device into
+				 * a seperate queue to share them with other devices when they come online 
+				 */
 			}
 			sendAck(content);
 		} else {
