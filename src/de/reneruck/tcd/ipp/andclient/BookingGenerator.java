@@ -19,15 +19,9 @@ public class BookingGenerator extends AsyncTask<String, Void, Void> {
 
 	private Context context;
 	
-	
-	
-	
 	public BookingGenerator(Context context) {
 		this.context = context;
 	}
-
-
-
 
 	@Override
 	protected Void doInBackground(String... params) {
@@ -38,6 +32,11 @@ public class BookingGenerator extends AsyncTask<String, Void, Void> {
 			param = param.substring(0, param.length()-1);
 		}
 		
+		String[] split = param.split(";");
+		
+		param = split[0];
+		Airport departureAiport = getdepartureAirport(split[1]);
+		
 		SimpleDateFormat formater = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 		Calendar calendar = Calendar.getInstance();
 
@@ -45,7 +44,7 @@ public class BookingGenerator extends AsyncTask<String, Void, Void> {
 			Date parsedDate = formater.parse(param);
 			calendar.setTime(parsedDate);
 			
-			Booking booking = new Booking("John Doe", calendar.getTime(), Airport.camp);
+			Booking booking = new Booking("John Doe", calendar.getTime(), departureAiport);
 			
 			NewBookingTransition bookingTransition = new NewBookingTransition(booking);
 			
@@ -60,6 +59,21 @@ public class BookingGenerator extends AsyncTask<String, Void, Void> {
 
 			
 		return null;
+	}
+
+
+
+	private Airport getdepartureAirport(String split) {
+		Airport airport = Airport.valueOf(split);
+		switch (airport) {
+		case camp:
+			return Airport.city;
+		case city:
+			return Airport.camp;
+		default:
+			break;
+		}
+		return Airport.camp;
 	}
 
 }
